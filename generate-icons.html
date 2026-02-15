@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generate PWA Icons</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: #f9fafb;
+    }
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    h1 { color: #1f2937; margin-bottom: 1rem; }
+    p { color: #6b7280; line-height: 1.6; margin-bottom: 1.5rem; }
+    button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-right: 1rem;
+      margin-bottom: 1rem;
+    }
+    button:hover { background: #1d4ed8; }
+    .preview {
+      display: flex;
+      gap: 2rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+    .preview-item {
+      text-align: center;
+    }
+    .preview-item img {
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .preview-item p {
+      margin-top: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #374151;
+    }
+    .instructions {
+      background: #fef3c7;
+      border: 1px solid #fbbf24;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1.5rem;
+    }
+    .instructions ol {
+      margin: 0.5rem 0 0 1.5rem;
+      color: #78350f;
+    }
+    .instructions li {
+      margin: 0.25rem 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 Generate PWA Icons</h1>
+    <p>
+      Click the buttons below to generate and download PNG icons for your PWA.
+      These icons are required for the app to be installable on mobile devices.
+    </p>
+    
+    <button onclick="generateIcon(192)">Generate 192x192 Icon</button>
+    <button onclick="generateIcon(512)">Generate 512x512 Icon</button>
+    
+    <div class="preview">
+      <div class="preview-item">
+        <canvas id="canvas192" width="192" height="192"></canvas>
+        <p>192x192px</p>
+      </div>
+      <div class="preview-item">
+        <canvas id="canvas512" width="512" height="512"></canvas>
+        <p>512x512px</p>
+      </div>
+    </div>
+
+    <div class="instructions">
+      <strong>📝 Instructions:</strong>
+      <ol>
+        <li>Click each button to generate and download the icon</li>
+        <li>Save the downloaded files as <code>icon-192.png</code> and <code>icon-512.png</code></li>
+        <li>Place both files in the <code>public/</code> directory of your project</li>
+        <li>Your PWA is now ready to be installed!</li>
+      </ol>
+    </div>
+  </div>
+
+  <script>
+    const svgString = `<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="100" fill="#2563eb"/>
+  <path d="M256 150C230 150 210 170 210 196C210 240 256 280 256 280C256 280 302 240 302 196C302 170 282 150 256 150Z" fill="white" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="256" cy="196" r="15" fill="#2563eb"/>
+  <path d="M180 320C180 280 256 240 256 240C256 240 332 280 332 320C332 355 300 380 256 380C212 380 180 355 180 320Z" fill="white" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
+    function generateIcon(size) {
+      const canvas = document.getElementById(`canvas${size}`);
+      const ctx = canvas.getContext('2d');
+      
+      const img = new Image();
+      const blob = new Blob([svgString], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      
+      img.onload = function() {
+        ctx.clearRect(0, 0, size, size);
+        ctx.drawImage(img, 0, 0, size, size);
+        
+        // Download the image
+        canvas.toBlob(function(blob) {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `icon-${size}.png`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        });
+        
+        URL.revokeObjectURL(url);
+      };
+      
+      img.src = url;
+    }
+
+    // Draw preview on load
+    window.onload = function() {
+      [192, 512].forEach(size => {
+        const canvas = document.getElementById(`canvas${size}`);
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        const blob = new Blob([svgString], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        
+        img.onload = function() {
+          ctx.drawImage(img, 0, 0, size, size);
+          URL.revokeObjectURL(url);
+        };
+        img.src = url;
+      });
+    };
+  </script>
+</body>
+</html>
