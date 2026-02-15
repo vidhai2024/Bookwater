@@ -37,6 +37,35 @@ function toRad(value: number): number {
   return (value * Math.PI) / 180;
 }
 
+// Calculate total distance for a route
+function calculateRouteDistance(deliveries: Delivery[], startLocation: Location): number {
+  if (deliveries.length === 0) return 0;
+  
+  let total = 0;
+  let current = startLocation;
+  
+  for (const delivery of deliveries) {
+    const distance = calculateDistance(current, {
+      lat: delivery.latitude,
+      lng: delivery.longitude,
+    });
+    total += distance;
+    current = { lat: delivery.latitude, lng: delivery.longitude };
+  }
+  
+  return total;
+}
+
+export function optimizeRoute(
+  deliveries: Delivery[],
+  currentLocation: Location
+): Delivery[] {
+  if (deliveries.length === 0) return [];
+
+  const unvisited = [...deliveries];
+  const optimized: Delivery[] = [];
+  let current = currentLocation;
+
   // Nearest neighbor algorithm
   while (unvisited.length > 0) {
     let nearestIndex = 0;
